@@ -55,6 +55,8 @@ jobs:
       #   - name: Deploy to GitHub Pages
       #     id: deployment
       #     uses: actions/deploy-pages@v4
+      - run: ls -al
+      - run: ls -al dist
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
