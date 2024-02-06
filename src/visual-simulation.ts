@@ -112,7 +112,7 @@ export default class VisualSimulation implements Robot {
     hostElement.appendChild(renderer.domElement);
 
     window.addEventListener("resize", () => {
-      const width = window.innerWidth - 100;
+      const width = window.innerWidth - 140;
       camera.aspect = width / window.innerHeight;
       camera.updateProjectionMatrix();
 
