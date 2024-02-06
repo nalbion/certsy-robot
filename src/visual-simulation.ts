@@ -3,11 +3,51 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 import Robot from "./robot";
 
+/**
+ * Copied from https://spicyyoghurt.com/tools/easing-functions
+ * @param t time - starts at 0
+ * @param b beginning value
+ * @param c change in value
+ * @param d duration
+ */
+function easeOutBack(t: number, b: number, c: number, d: number) {
+  const s = 1.70158;
+  return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+}
+
+class Animation {
+  startedAt?: number;
+
+  constructor(
+    private beginning: number,
+    private change: number,
+    public finalValue: number,
+    private duration: number,
+    public onUpdate: (value: number) => void
+  ) {}
+
+  isFinished(timestamp: number) {
+    return this.startedAt && timestamp > this.startedAt + this.duration;
+  }
+
+  update(timestamp: number) {
+    if (this.startedAt === undefined) {
+      this.startedAt = timestamp;
+    }
+
+    const t = timestamp - this.startedAt;
+    console.info(`update at ${timestamp}, t=${t}, duration=${this.duration}`);
+    let value = t >= this.duration ? this.finalValue : easeOutBack(t, this.beginning, this.change, this.duration);
+    this.onUpdate(value);
+  }
+}
+
 export default class VisualSimulation implements Robot {
   private robotPlaced = false;
 
   private scene?: THREE.Scene;
   private robot?: THREE.Object3D;
+  private animations: Animation[] = [];
   private clock = new THREE.Clock();
 
   constructor() {}
@@ -28,35 +68,57 @@ export default class VisualSimulation implements Robot {
 
   async move() {
     const x = this.robot!.position.x;
-    const y = this.robot!.position.z;
+    const z = this.robot!.position.z;
 
     let newX = x;
-    let newY = y;
+    let newZ = z;
 
     switch (this.robot!.rotation.y) {
       case 0:
-        newY++;
+        newZ++;
         break;
       case Math.PI / 2:
         newX++;
         break;
       case Math.PI:
-        newY--;
+        newZ--;
         break;
       case (3 * Math.PI) / 2:
         newX--;
         break;
     }
 
-    this.robot?.position.set(newX, 0, newY);
+    console.info("move robot, facing:", this.robot!.rotation.y, "from:", x, z, "to:", newX, newZ);
+
+    // this.robot?.position.set(newX, 0, newY);
+
+    if (x !== newX) {
+      this.createAnimation(x, newX - x, newX, 1, (value) => {
+        this.robot!.position.x = value;
+      });
+    } else {
+      this.createAnimation(z, newZ - z, newZ, 1, (value) => {
+        this.robot!.position.z = value;
+      });
+    }
   }
 
   async rotateLeft() {
-    this.robot!.rotation.y = (this.robot!.rotation.y + Math.PI / 2) % (2 * Math.PI);
+    const delta = Math.PI / 2;
+    const finalValue = (this.robot!.rotation.y + delta) % (2 * Math.PI);
+    this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
+      this.robot!.rotation.y = value;
+    });
   }
 
   async rotateRight() {
-    this.robot!.rotation.y = (this.robot!.rotation.y - Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
+    const delta = -Math.PI / 2;
+    const finalValue = (this.robot!.rotation.y + delta + 2 * Math.PI) % (2 * Math.PI);
+    this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
+      this.robot!.rotation.y = value;
+    });
+
+    // this.robot!.rotation.y = (this.robot!.rotation.y - Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
   }
 
   async init(hostElement: HTMLDivElement) {
@@ -73,12 +135,55 @@ export default class VisualSimulation implements Robot {
     const animate = () => {
       requestAnimationFrame(animate);
 
-      //   robot.rotation.y += 0.01;
+      const elapsedTime = this.clock.getElapsedTime();
+
+      // Process animations
+      for (let i = 0; i == 0 && i < this.animations.length; i++) {
+        // If the animation is complete, remove it from the array
+        if (this.animations[i].isFinished(elapsedTime)) {
+          console.info("animation complete, set to final value", this.animations[i].finalValue);
+          this.animations[i].onUpdate(this.animations[i].finalValue);
+          this.animations.splice(i, 1);
+          i--;
+        } else {
+          this.animations[i].update(elapsedTime);
+        }
+      }
 
       renderer.render(scene, camera);
     };
 
     animate();
+  }
+
+  private createAnimation(
+    startValue: number,
+    change: number,
+    finalValue: number,
+    duration: number,
+    onUpdate: (value: number) => void
+  ) {
+    // this.animations.push({
+    //   startTime: 0,
+    //   beginning,
+    //   change,
+    //   duration,
+    //   func: (timestamp: number) => {
+    //     if (timestamp > )
+    //     // this.robot!.rotation.y = easeInOutBack(timestamp, 0, 1, 1);
+    //   },
+    // });
+    const animation = new Animation(startValue, change, finalValue, duration, onUpdate);
+    // (value) => {
+    // if (animation.isFinished(timestamp)) {
+    //   this.animations.splice(this.animations.indexOf(animation), 1);
+    // } else {
+    //   animation.update(timestamp);
+    //   func(timestamp);
+    // }
+    // });
+
+    this.animations.push(animation);
   }
 
   private async createScene(): Promise<THREE.Scene> {
