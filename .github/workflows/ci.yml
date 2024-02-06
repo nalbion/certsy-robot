@@ -23,25 +23,40 @@ jobs:
         run: npm run test:ci
       - name: Build
         run: npm run build
-      - name: Upload dist directory
-        uses: actions/upload-artifact@v4
+      #   - name: Upload dist directory
+      #     uses: actions/upload-artifact@v4
+      #     with:
+      #       name: dist
+      #       path: dist
+      #   - name: Setup Pages
+      #     uses: actions/configure-pages@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: dist
           path: dist
 
   deploy:
     needs: build_and_test
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Download dist directory
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
+      #   - name: Checkout code
+      #     uses: actions/checkout@v4
+      #   - name: Download dist directory
+      #     uses: actions/download-artifact@v4
+      #     with:
+      #       name: dist
+      #       path: dist
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist
-          token: ${{ secrets.DEPLOY_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@v4
+    #   - name: Deploy to GitHub Pages
+    #     uses: JamesIves/github-pages-deploy-action@v4
+    #     with:
+    #       folder: dist
+    #       token: ${{ secrets.DEPLOY_TOKEN }}
