@@ -28,7 +28,7 @@ window.addEventListener("keydown", (event) => {
     case "ArrowRight":
       controller.rotateRight();
       break;
-    case " ":
+    case "ArrowDown":
       report();
   }
 });

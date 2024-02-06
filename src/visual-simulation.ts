@@ -4,14 +4,10 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import Robot from "./robot";
 
 export default class VisualSimulation implements Robot {
-  // private heading: number = 0;
   private robotPlaced = false;
 
   private scene?: THREE.Scene;
-  // private camera: THREE.PerspectiveCamera;
   private robot?: THREE.Object3D;
-  // private table: THREE.Mesh;
-  // private renderer: THREE.WebGLRenderer;
   private clock = new THREE.Clock();
 
   constructor() {}
@@ -27,7 +23,6 @@ export default class VisualSimulation implements Robot {
   }
 
   setHeading(heading: number) {
-    // this.heading = heading;
     this.robot!.rotation.y = heading;
   }
 
@@ -154,12 +149,9 @@ export default class VisualSimulation implements Robot {
 
       // Adjust the robot insertion position so that it pivots on the wheel
       robot.position.z = 0.3;
-
       const pivot = new THREE.Object3D();
       pivot.add(robot);
       robot = pivot;
-      // robot.position.set(2.5, 0, 0);
-      // robot.rotation.y = Math.PI;
     } catch (err) {
       console.error("Error loading model:", err);
       const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -167,7 +159,6 @@ export default class VisualSimulation implements Robot {
       robot = new THREE.Mesh(geometry, material);
     }
 
-    // scene.add(robot);
     return robot;
   }
 

@@ -1,14 +1,5 @@
 import Robot from "./robot";
 
-// const facingToHeading = {
-//   NORTH: Math.PI / 2,
-//   EAST: 0,
-//   SOUTH: -Math.PI / 2,
-//   WEST: Math.PI,
-// };
-
-// export type FacingDirection = keyof typeof facingToHeading;
-
 export type FacingDirection = "NORTH" | "EAST" | "SOUTH" | "WEST";
 
 const directions: Array<{ facing: FacingDirection; heading: number }> = [
@@ -26,7 +17,6 @@ export default class RobotController {
   private x?: number;
   private y?: number;
   private facing?: FacingDirection;
-  // private heading?: number;
   private headingIndex?: number;
 
   constructor(private maxX: number, private maxY: number, private robot: Robot) {}
@@ -43,7 +33,6 @@ export default class RobotController {
     this.y = y;
     this.facing = facing;
     this.robot.setPosition(x, y);
-    // this.robot.setHeading(facingToHeading[facing]);
     this.headingIndex = directions.findIndex((d) => d.facing === facing);
     this.robot.setHeading(directions[this.headingIndex].heading);
   }
@@ -92,13 +81,7 @@ export default class RobotController {
 
     this.headingIndex = (this.headingIndex - 1 + directions.length) % directions.length;
     this.facing = directions[this.headingIndex].facing;
-    // this.robot.setHeading(directions[this.headingIndex].heading);
     return this.robot.rotateLeft();
-
-    // const currentIndex = directions.findIndex((d) => d.facing === this.facing);
-    // const newFacing = directions[(currentIndex + 1) % directions.length].facing;
-    // this.facing = newFacing;
-    // this.robot.setHeading(directions.find((d) => d.facing === newFacing)!!.heading);
   }
 
   rotateRight() {
@@ -109,7 +92,6 @@ export default class RobotController {
 
     this.headingIndex = (this.headingIndex + 1) % directions.length;
     this.facing = directions[this.headingIndex].facing;
-    // this.robot.setHeading(directions[this.headingIndex].heading);
     return this.robot.rotateRight();
   }
 
