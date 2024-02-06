@@ -37,28 +37,37 @@
         background-color: silver;
         height: 100%;
       }
+
+      footer {
+        font-size: 10pt;
+      }
     </style>
   </head>
   <body>
     <div id="app">
       <form>
-        <label>X: <input type="number" id="x" min="0" max="5" /></label>
-        <label>Y: <input type="number" id="y" min="0" max="5" /></label>
+        <label>X: <input type="number" id="x" min="0" max="5" value="2.5" /></label>
+        <label>Y: <input type="number" id="y" min="0" max="5" value="2.5" /></label>
         <select id="facing">
           <option value="NORTH">NORTH</option>
           <option value="SOUTH">SOUTH</option>
           <option value="EAST">EAST</option>
           <option value="WEST">WEST</option>
         </select>
-        <button type="button" id="place">Place Robot</button>
-        <button type="button" id="move">Move</button>
-        <button type="button" id="left">Left</button>
-        <button type="button" id="right">Right</button>
-        <button type="button" id="report">Report</button>
+        <button type="button" id="place" disabled>Place Robot</button>
+        <button type="button" id="move" disabled>Move</button>
+        <button type="button" id="left" disabled>Left</button>
+        <button type="button" id="right" disabled>Right</button>
+        <button type="button" id="report" disabled>Report</button>
         <div id="output"></div>
+        <footer>
+          Robot model courtesy of
+          <a href="https://sketchfab.com/3d-models/phillip-robot-653ce57d82ac4a6385ddd94bdcfa9cee">Caboose3D</a>
+        </footer>
       </form>
       <div id="robot"></div>
     </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

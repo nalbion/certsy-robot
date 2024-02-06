@@ -1,121 +1,56 @@
-import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import RobotController, { FacingDirection } from "./robot-controller";
+import VisualSimulation from "./visual-simulation";
 
-let scene: THREE.Scene, camera: THREE.PerspectiveCamera, robot: THREE.Object3D;
-let table: THREE.Mesh;
-let renderer: THREE.WebGLRenderer;
+const robot = new VisualSimulation();
+robot.init(document.getElementById("robot") as HTMLDivElement).then(() => {
+  document.getElementById("place")!.removeAttribute("disabled");
+  document.getElementById("move")!.removeAttribute("disabled");
+  document.getElementById("left")!.removeAttribute("disabled");
+  document.getElementById("right")!.removeAttribute("disabled");
+  document.getElementById("report")!.removeAttribute("disabled");
+});
 
-const clock = new THREE.Clock();
+const controller = new RobotController(5, 5, robot);
 
-async function init() {
-  scene = await createScene();
-
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(-2, 1.5, -2);
-  camera.lookAt(2.5, 0.5, 2.5);
-
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.shadowMap.enabled = true;
-  const hostElement = document.getElementById("robot") as HTMLDivElement;
-  renderer.setSize(hostElement.clientWidth, hostElement.clientHeight);
-  hostElement.appendChild(renderer.domElement);
-
-  table = createTable();
-  robot = await createRobot();
-
-  window.addEventListener("resize", () => {
-    const width = window.innerWidth - 100;
-    camera.aspect = width / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth - 100, window.innerHeight);
-  });
-
-  createLighting(scene);
-
-  document.getElementById("move")?.addEventListener("click", () => {
-    robot.position.x += 0.1;
-  });
+function report() {
+  const output = controller.report();
+  document.getElementById("output")!.textContent = output;
 }
 
-async function createScene() {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xa0a0a0);
-
-  try {
-    const envTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-      new THREE.TextureLoader().load("background.png", resolve, undefined, reject);
-    });
-    envTexture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = envTexture;
-  } catch (err) {
-    console.error("Error loading environment:", err);
+window.addEventListener("keydown", (event) => {
+  switch (event.key) {
+    case "ArrowUp":
+      controller.move();
+      break;
+    case "ArrowLeft":
+      controller.rotateLeft();
+      break;
+    case "ArrowRight":
+      controller.rotateRight();
+      break;
+    case " ":
+      report();
   }
+});
 
-  return scene;
-}
+document.getElementById("place")?.addEventListener("click", () => {
+  const x = Number((document.getElementById("x") as HTMLInputElement).value);
+  const y = Number((document.getElementById("y") as HTMLInputElement).value);
+  const facing = (document.getElementById("facing") as HTMLInputElement).value as FacingDirection;
 
-function createTable() {
-  const geometry = new THREE.BoxGeometry(5, 1, 5);
-  const material = new THREE.MeshLambertMaterial({ color: THREE.Color.NAMES.saddlebrown });
-  table = new THREE.Mesh(geometry, material);
-  table.receiveShadow = true;
-  table.position.set(2.5, -0.5, 2.5);
-  scene.add(table);
-  return table;
-}
+  controller.placeRobot(x, y, facing);
+});
 
-async function createRobot() {
-  const loader = new GLTFLoader();
-  let robot;
+document.getElementById("move")?.addEventListener("click", () => {
+  controller.move();
+});
 
-  try {
-    const gltf = await loader.loadAsync("phillip_robot/scene.gltf");
-    robot = gltf.scene;
-    const mesh = gltf.scene.children[0] as THREE.Mesh;
-    mesh.castShadow = true;
-    mesh.scale.set(0.5, 0.5, 0.5);
+document.getElementById("left")?.addEventListener("click", () => {
+  controller.rotateLeft();
+});
 
-    robot.traverse(function (object) {
-      if (object.isMesh) object.castShadow = true;
-    });
+document.getElementById("right")?.addEventListener("click", () => {
+  controller.rotateRight();
+});
 
-    // Adjust the robot insertion position so that it pivots on the wheel
-    robot.position.z = 0.3;
-
-    const pivot = new THREE.Object3D();
-    pivot.add(robot);
-    robot = pivot;
-    robot.position.set(2.5, 0, 2.5);
-  } catch (err) {
-    console.error("Error loading model:", err);
-    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    robot = new THREE.Mesh(geometry, material);
-  }
-
-  scene.add(robot);
-  return robot;
-}
-
-function createLighting(scene: THREE.Scene) {
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
-  hemiLight.position.set(2.5, 20, 2.5);
-  scene.add(hemiLight);
-
-  const dirLight = new THREE.DirectionalLight(0xffffff, 3);
-  dirLight.position.set(2.5, 10, -10);
-  dirLight.castShadow = true;
-
-  scene.add(dirLight);
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-
-  robot.rotation.y += 0.01;
-
-  renderer.render(scene, camera);
-}
-
-init().then(() => animate());
+document.getElementById("report")?.addEventListener("click", report);
