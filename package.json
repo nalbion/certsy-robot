@@ -8,7 +8,7 @@
     "dev": "vite",
     "preview": "vite preview",
     "test": "jest",
-    "test:ci": "start-server-and-test dev http://localhost:5173 test",
+    "test:ci": "start-server-and-test dev http://127.0.0.1:5173 test",
     "build": "tsc && vite build",
     "build:cli": "tsc --outDir dist src/cli.ts",
     "lint": "eslint src --ext ts",
