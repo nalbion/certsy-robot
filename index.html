@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certsy Robot Simulation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      #app {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px;
+        width: 100px;
+      }
+
+      form > * + * {
+        margin-top: 8px;
+      }
+
+      #robot {
+        flex-grow: 1;
+        background-color: silver;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <form>
+        <label>X: <input type="number" id="x" min="0" max="5" /></label>
+        <label>Y: <input type="number" id="y" min="0" max="5" /></label>
+        <select id="facing">
+          <option value="NORTH">NORTH</option>
+          <option value="SOUTH">SOUTH</option>
+          <option value="EAST">EAST</option>
+          <option value="WEST">WEST</option>
+        </select>
+        <button type="button" id="place">Place Robot</button>
+        <button type="button" id="move">Move</button>
+        <button type="button" id="left">Left</button>
+        <button type="button" id="right">Right</button>
+        <button type="button" id="report">Report</button>
+        <div id="output"></div>
+      </form>
+      <div id="robot"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
