@@ -39,8 +39,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
+      - name: dir
+        run: ls -al
+      - run: ls -al dist
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: JamesIves/github-pages-deploy-action@4.5.0
         with:
-          branch: gh-pages
           folder: dist
