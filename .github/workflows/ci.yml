@@ -23,13 +23,22 @@ jobs:
         run: npm run test:ci
       - name: Build
         run: npm run build
+      - name: Upload dist directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
 
   deploy:
     needs: build_and_test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      #   - name: Checkout code
+      #     uses: actions/checkout@v2
+      - name: Download dist directory
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:

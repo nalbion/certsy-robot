@@ -19,6 +19,7 @@ describe("UI Test", () => {
 
   it("should simulate user interactions and assert against a pre-recorded screenshot", async () => {
     if (process.env.CI) {
+      // https://github.com/bahmutov/start-server-and-test/issues/287
       return;
     }
     // Given
