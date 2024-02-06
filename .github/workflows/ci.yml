@@ -38,27 +38,27 @@ jobs:
   deploy:
     needs: build_and_test
     runs-on: ubuntu-latest
-    # permissions:
-    #   pages: write
-    #   id-token: write
-    # environment:
-    #   name: github-pages
-    #   url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Download dist directory
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: dist
-      #   - name: Deploy to GitHub Pages
-      #     id: deployment
-      #     uses: actions/deploy-pages@v4
-      - run: ls -al
-      - run: ls -al dist
+      #   - name: Checkout code
+      #     uses: actions/checkout@v4
+      #   - name: Download dist directory
+      #     uses: actions/download-artifact@v4
+      #     with:
+      #       name: github-pages
+      #       path: dist
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist
-          token: ${{ secrets.DEPLOY_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@v4
+    #   - run: ls -al
+    #   - run: ls -al dist
+    #   - name: Deploy to GitHub Pages
+    #     uses: JamesIves/github-pages-deploy-action@v4
+    #     with:
+    #       folder: .
+    #       token: ${{ secrets.DEPLOY_TOKEN }}
