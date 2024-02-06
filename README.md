@@ -55,7 +55,7 @@ REPORT
 npm run dev
 ```
 
-Now browse to [http://localhost:4173]
+Now browse to [http://localhost:4173](http://localhost:4173)
 
 ## Constraints
 

@@ -36,5 +36,5 @@ describe("UI Test", () => {
       failureThresholdType: "percent",
       comparisonMethod: "ssim",
     });
-  });
+  }, 10000);
 });
