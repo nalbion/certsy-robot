@@ -2,11 +2,18 @@
   "name": "certsy-robot",
   "version": "1.0.0",
   "description": "A simulation of a toy robot moving on a square tabletop",
+  "main": "dist/cli.js",
   "scripts": {
-    "test": "jest",
+    "cli": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" src/cli.ts",
     "dev": "vite",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:ci": "start-server-and-test dev http://localhost:5173 test",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build:cli": "tsc --outDir dist src/cli.ts",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint --fix .",
+    "prettier:fix": "prettier --write ."
   },
   "author": "Nicholas Albion",
   "dependencies": {
@@ -17,7 +24,15 @@
     "@babel/preset-env": "^7.23.9",
     "@babel/preset-typescript": "^7.23.3",
     "@types/jest": "^29.5.12",
+    "@types/jest-image-snapshot": "^6.4.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
     "jest": "^29.7.0",
+    "jest-image-snapshot": "^6.4.0",
+    "prettier": "^3.2.5",
+    "puppeteer": "^22.0.0",
+    "start-server-and-test": "^2.0.3",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
   }

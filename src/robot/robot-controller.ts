@@ -2,11 +2,31 @@ import Robot from "./robot";
 
 export type FacingDirection = "NORTH" | "EAST" | "SOUTH" | "WEST";
 
-const directions: Array<{ facing: FacingDirection; heading: number }> = [
-  { facing: "NORTH", heading: Math.PI / 2 },
-  { facing: "EAST", heading: 0 },
-  { facing: "SOUTH", heading: (3 * Math.PI) / 2 },
-  { facing: "WEST", heading: Math.PI },
+const directions: Array<{
+  facing: FacingDirection;
+  heading: number;
+  move: (x: number, y: number) => { x: number; y: number };
+}> = [
+  {
+    facing: "NORTH",
+    heading: Math.PI / 2,
+    move: (x, y) => ({ x, y: y + 1 }),
+  },
+  {
+    facing: "EAST",
+    heading: 0,
+    move: (x, y) => ({ x: x + 1, y }),
+  },
+  {
+    facing: "SOUTH",
+    heading: (3 * Math.PI) / 2,
+    move: (x, y) => ({ x, y: y - 1 }),
+  },
+  {
+    facing: "WEST",
+    heading: Math.PI,
+    move: (x, y) => ({ x: x - 1, y }),
+  },
 ];
 
 /**
@@ -19,14 +39,18 @@ export default class RobotController {
   private facing?: FacingDirection;
   private headingIndex?: number;
 
-  constructor(private maxX: number, private maxY: number, private robot: Robot) {}
+  constructor(
+    private maxX: number,
+    private maxY: number,
+    private robot: Robot
+  ) {}
 
   placeRobot(x: number, y: number, facing: FacingDirection) {
     if (!this.isValidPlacement(x, y)) {
       throw new Error("Invalid position");
     }
     if (!["NORTH", "SOUTH", "EAST", "WEST"].includes(facing)) {
-      throw new Error("Invalid facing direction");
+      throw new Error("Invalid facing direction. Valid options are NORTH, SOUTH, EAST, WEST.");
     }
 
     this.x = x;
@@ -38,29 +62,13 @@ export default class RobotController {
   }
 
   move() {
-    let x = this.x;
-    let y = this.y;
-
-    if (x === undefined || y === undefined || this.facing === undefined) {
+    if (this.x === undefined || this.y === undefined || this.headingIndex === undefined) {
       console.info("Robot has not been placed");
       return;
     }
 
     // Calculate the new position
-    switch (this.facing) {
-      case "NORTH":
-        y++;
-        break;
-      case "EAST":
-        x++;
-        break;
-      case "SOUTH":
-        y--;
-        break;
-      case "WEST":
-        x--;
-        break;
-    }
+    const { x, y } = directions[this.headingIndex].move(this.x, this.y);
 
     if (!this.isValidPlacement(x, y)) {
       console.warn("Robot would fall off the table");

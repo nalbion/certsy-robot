@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 import Robot from "./robot";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 /**
  * Copied from https://spicyyoghurt.com/tools/easing-functions
@@ -42,17 +42,18 @@ class Animation {
   }
 }
 
-export default class VisualSimulation implements Robot {
+/**
+ * @see http://localhost:5173/
+ */
+export default class VisualSimulation extends Robot {
   private robotPlaced = false;
-
   private scene?: THREE.Scene;
   private robot?: THREE.Object3D;
-  private animations: Animation[] = [];
+  private commandQueue: Array<Function> = [];
+  private animation?: Animation;
   private clock = new THREE.Clock();
 
-  constructor() {}
-
-  setPosition(x: number, y: number) {
+  override setPosition(x: number, y: number) {
     // Note: x/y are not as user would expect
     this.robot!.position.set(y, 0, x);
 
@@ -62,73 +63,73 @@ export default class VisualSimulation implements Robot {
     }
   }
 
-  setHeading(heading: number) {
+  override setHeading(heading: number) {
     this.robot!.rotation.y = heading;
   }
 
-  async move() {
-    const x = this.robot!.position.x;
-    const z = this.robot!.position.z;
+  override async move() {
+    this.commandQueue.push(() => {
+      const x = this.robot!.position.x;
+      const z = this.robot!.position.z;
 
-    let newX = x;
-    let newZ = z;
+      let newX = x;
+      let newZ = z;
 
-    switch (this.robot!.rotation.y) {
-      case 0:
-        newZ++;
-        break;
-      case Math.PI / 2:
-        newX++;
-        break;
-      case Math.PI:
-        newZ--;
-        break;
-      case (3 * Math.PI) / 2:
-        newX--;
-        break;
-    }
+      switch (this.robot!.rotation.y) {
+        case 0:
+          newZ++;
+          break;
+        case Math.PI / 2:
+          newX++;
+          break;
+        case Math.PI:
+          newZ--;
+          break;
+        case (3 * Math.PI) / 2:
+          newX--;
+          break;
+      }
 
-    console.info("move robot, facing:", this.robot!.rotation.y, "from:", x, z, "to:", newX, newZ);
-
-    // this.robot?.position.set(newX, 0, newY);
-
-    if (x !== newX) {
-      this.createAnimation(x, newX - x, newX, 1, (value) => {
-        this.robot!.position.x = value;
-      });
-    } else {
-      this.createAnimation(z, newZ - z, newZ, 1, (value) => {
-        this.robot!.position.z = value;
-      });
-    }
-  }
-
-  async rotateLeft() {
-    const delta = Math.PI / 2;
-    const finalValue = (this.robot!.rotation.y + delta) % (2 * Math.PI);
-    this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
-      this.robot!.rotation.y = value;
+      if (x !== newX) {
+        this.createAnimation(x, newX - x, newX, 1, (value) => {
+          this.robot!.position.x = value;
+        });
+      } else {
+        this.createAnimation(z, newZ - z, newZ, 1, (value) => {
+          this.robot!.position.z = value;
+        });
+      }
     });
   }
 
-  async rotateRight() {
-    const delta = -Math.PI / 2;
-    const finalValue = (this.robot!.rotation.y + delta + 2 * Math.PI) % (2 * Math.PI);
-    this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
-      this.robot!.rotation.y = value;
+  override async rotateLeft() {
+    this.commandQueue.push(() => {
+      const delta = Math.PI / 2;
+      const finalValue = (this.robot!.rotation.y + delta) % (2 * Math.PI);
+      this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
+        this.robot!.rotation.y = value;
+      });
     });
-
-    // this.robot!.rotation.y = (this.robot!.rotation.y - Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
   }
 
-  async init(hostElement: HTMLDivElement) {
+  override async rotateRight() {
+    this.commandQueue.push(() => {
+      const delta = -Math.PI / 2;
+      const finalValue = (this.robot!.rotation.y + delta + 2 * Math.PI) % (2 * Math.PI);
+      this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
+        this.robot!.rotation.y = value;
+      });
+    });
+  }
+
+  async init(hostElement: HTMLDivElement, width: number, depth: number) {
     const scene = await this.createScene();
     this.scene = scene;
-    this.createLighting(scene);
-    const camera = this.createCamera();
+    this.createLighting(scene, width, depth);
+    const camera = this.createCamera(width, depth);
     const renderer = this.createRenderer(camera, hostElement);
 
-    this.createTable(scene);
+    this.createTable(scene, width, depth);
     this.robot = await this.createRobot();
 
     // Run the animation
@@ -137,16 +138,18 @@ export default class VisualSimulation implements Robot {
 
       const elapsedTime = this.clock.getElapsedTime();
 
-      // Process animations
-      for (let i = 0; i == 0 && i < this.animations.length; i++) {
-        // If the animation is complete, remove it from the array
-        if (this.animations[i].isFinished(elapsedTime)) {
-          console.info("animation complete, set to final value", this.animations[i].finalValue);
-          this.animations[i].onUpdate(this.animations[i].finalValue);
-          this.animations.splice(i, 1);
-          i--;
+      if (!this.animation && this.commandQueue.length > 0) {
+        // Dequeue an action and execute it
+        let command = this.commandQueue.shift();
+        command!();
+      }
+
+      if (this.animation) {
+        if (this.animation.isFinished(elapsedTime)) {
+          this.animation.onUpdate(this.animation.finalValue);
+          this.animation = undefined;
         } else {
-          this.animations[i].update(elapsedTime);
+          this.animation.update(elapsedTime);
         }
       }
 
@@ -163,27 +166,7 @@ export default class VisualSimulation implements Robot {
     duration: number,
     onUpdate: (value: number) => void
   ) {
-    // this.animations.push({
-    //   startTime: 0,
-    //   beginning,
-    //   change,
-    //   duration,
-    //   func: (timestamp: number) => {
-    //     if (timestamp > )
-    //     // this.robot!.rotation.y = easeInOutBack(timestamp, 0, 1, 1);
-    //   },
-    // });
-    const animation = new Animation(startValue, change, finalValue, duration, onUpdate);
-    // (value) => {
-    // if (animation.isFinished(timestamp)) {
-    //   this.animations.splice(this.animations.indexOf(animation), 1);
-    // } else {
-    //   animation.update(timestamp);
-    //   func(timestamp);
-    // }
-    // });
-
-    this.animations.push(animation);
+    this.animation = new Animation(startValue, change, finalValue, duration, onUpdate);
   }
 
   private async createScene(): Promise<THREE.Scene> {
@@ -203,21 +186,22 @@ export default class VisualSimulation implements Robot {
     return scene;
   }
 
-  private createCamera(): THREE.PerspectiveCamera {
+  private createCamera(width: number, depth: number): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(-2, 1.5, -2);
-    camera.lookAt(2.5, 0.5, 2.5);
+    camera.position.set(-Math.sqrt(depth), 1.5, -Math.sqrt(width));
+    camera.lookAt(depth / 2, 0.5, width / 2);
     return camera;
   }
 
   private createRenderer(camera: THREE.PerspectiveCamera, hostElement: HTMLDivElement) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.shadowMap.enabled = true;
+    const deltaWidth = window.innerWidth - hostElement.clientWidth;
     renderer.setSize(hostElement.clientWidth, hostElement.clientHeight);
     hostElement.appendChild(renderer.domElement);
 
     window.addEventListener("resize", () => {
-      const width = window.innerWidth - 140;
+      const width = window.innerWidth - deltaWidth;
       camera.aspect = width / window.innerHeight;
       camera.updateProjectionMatrix();
 
@@ -227,12 +211,12 @@ export default class VisualSimulation implements Robot {
     return renderer;
   }
 
-  private createTable(scene: THREE.Scene): THREE.Mesh {
-    const geometry = new THREE.BoxGeometry(5, 1, 5);
+  private createTable(scene: THREE.Scene, width: number, depth: number): THREE.Mesh {
+    const geometry = new THREE.BoxGeometry(depth, 1, width);
     const material = new THREE.MeshLambertMaterial({ color: THREE.Color.NAMES.saddlebrown });
     const table = new THREE.Mesh(geometry, material);
     table.receiveShadow = true;
-    table.position.set(2.5, -0.5, 2.5);
+    table.position.set(depth / 2, -0.5, width / 2);
     scene.add(table);
     return table;
   }
@@ -249,7 +233,9 @@ export default class VisualSimulation implements Robot {
       mesh.scale.set(0.5, 0.5, 0.5);
 
       robot.traverse(function (object) {
-        if ((object as THREE.Mesh).isMesh) (object as THREE.Mesh).castShadow = true;
+        if ((object as THREE.Mesh).isMesh) {
+          (object as THREE.Mesh).castShadow = true;
+        }
       });
 
       // Adjust the robot insertion position so that it pivots on the wheel
@@ -267,15 +253,14 @@ export default class VisualSimulation implements Robot {
     return robot;
   }
 
-  private createLighting(scene: THREE.Scene) {
+  private createLighting(scene: THREE.Scene, width: number, depth: number) {
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
-    hemiLight.position.set(2.5, 20, 2.5);
+    hemiLight.position.set(depth / 2, 20, width / 2);
     scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight(0xffffff, 3);
-    dirLight.position.set(2.5, 10, -10);
+    dirLight.position.set(depth / 2, 10, -(width + 5));
     dirLight.castShadow = true;
-
     scene.add(dirLight);
   }
 }

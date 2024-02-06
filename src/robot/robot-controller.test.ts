@@ -1,24 +1,12 @@
 import Robot from "./robot";
 import RobotController, { FacingDirection } from "./robot-controller";
 
-class TestRobot implements Robot {
-  setPosition(x: number, y: number): void {}
-
-  setHeading(heading: number) {}
-
-  async move() {}
-
-  async rotateLeft() {}
-
-  async rotateRight() {}
-}
-
 let robot: Robot;
 let controller: RobotController;
 
 describe("RobotController", () => {
   beforeEach(() => {
-    robot = new TestRobot();
+    robot = new Robot();
     controller = new RobotController(5, 5, robot);
   });
 
@@ -37,6 +25,22 @@ describe("RobotController", () => {
 
     // Then
     expect(report).toBe("2,2,NORTH");
+  });
+
+  it("should all report to be requested multiple times", async () => {
+    // Given
+    controller.placeRobot(2, 2, "NORTH");
+
+    // When
+    const report1 = controller.report();
+    await controller.move();
+    await controller.rotateRight();
+    await controller.move();
+    const report2 = controller.report();
+
+    // Then
+    expect(report1).toBe("2,2,NORTH");
+    expect(report2).toBe("3,3,EAST");
   });
 
   it("should not allow placing the robot outside the table", () => {
