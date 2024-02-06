@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+  width: 100px;
+  min-height: 100vh;
+}
+
+form label:first-child {
+  margin-top: 20px;
+}
+
+form > * + * {
+  margin-top: 8px;
+}
+
+#robot {
+  flex-grow: 1;
+  background-color: silver;
+  min-height: 100vh;
+}
+
+footer {
+  margin-top: auto;
+  margin-bottom: 8px;
+  font-size: 10pt;
+}
