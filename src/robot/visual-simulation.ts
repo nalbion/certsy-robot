@@ -36,7 +36,6 @@ class Animation {
     }
 
     const t = timestamp - this.startedAt;
-    console.info(`update at ${timestamp}, t=${t}, duration=${this.duration}`);
     let value = t >= this.duration ? this.finalValue : easeOutBack(t, this.beginning, this.change, this.duration);
     this.onUpdate(value);
   }

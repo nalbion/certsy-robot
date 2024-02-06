@@ -1,6 +1,7 @@
 # Robot Challenge
 
-![ui-test](src/__image_snapshots__/ui-test.png?raw=true)
+[Play with me!](https://nalbion.github.io/certsy-robot)
+[![Robot Simulator UI](src/__image_snapshots__/ui-test.png?raw=true)](https://nalbion.github.io/certsy-robot)
 
 ## Description
 
