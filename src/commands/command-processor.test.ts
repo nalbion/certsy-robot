@@ -3,7 +3,7 @@ import { Robot } from "../robot";
 import RobotController from "../robot/robot-controller";
 import CommandProcessor from "./command-processor";
 
-jest.mock("./robot/robot-controller", () => {
+jest.mock("../robot/robot-controller", () => {
   return jest.fn().mockImplementation(() => {
     return {
       placeRobot: jest.fn(),
