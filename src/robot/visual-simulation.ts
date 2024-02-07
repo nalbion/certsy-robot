@@ -23,7 +23,7 @@ class Animation {
     private change: number,
     public finalValue: number,
     private duration: number,
-    public onUpdate: (value: number) => void
+    public onUpdate: (value: number) => void,
   ) {}
 
   isFinished(timestamp: number) {
@@ -36,7 +36,10 @@ class Animation {
     }
 
     const t = timestamp - this.startedAt;
-    let value = t >= this.duration ? this.finalValue : easeOutBack(t, this.beginning, this.change, this.duration);
+    let value =
+      t >= this.duration
+        ? this.finalValue
+        : easeOutBack(t, this.beginning, this.change, this.duration);
     this.onUpdate(value);
   }
 }
@@ -108,19 +111,32 @@ export default class VisualSimulation extends Robot {
     this.commandQueue.push(() => {
       const delta = Math.PI / 2;
       const finalValue = (this.robot!.rotation.y + delta) % (2 * Math.PI);
-      this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
-        this.robot!.rotation.y = value;
-      });
+      this.createAnimation(
+        this.robot!.rotation.y,
+        delta,
+        finalValue,
+        1,
+        (value) => {
+          this.robot!.rotation.y = value;
+        },
+      );
     });
   }
 
   override async rotateRight() {
     this.commandQueue.push(() => {
       const delta = -Math.PI / 2;
-      const finalValue = (this.robot!.rotation.y + delta + 2 * Math.PI) % (2 * Math.PI);
-      this.createAnimation(this.robot!.rotation.y, delta, finalValue, 1, (value) => {
-        this.robot!.rotation.y = value;
-      });
+      const finalValue =
+        (this.robot!.rotation.y + delta + 2 * Math.PI) % (2 * Math.PI);
+      this.createAnimation(
+        this.robot!.rotation.y,
+        delta,
+        finalValue,
+        1,
+        (value) => {
+          this.robot!.rotation.y = value;
+        },
+      );
     });
   }
 
@@ -166,9 +182,15 @@ export default class VisualSimulation extends Robot {
     change: number,
     finalValue: number,
     duration: number,
-    onUpdate: (value: number) => void
+    onUpdate: (value: number) => void,
   ) {
-    this.animation = new Animation(startValue, change, finalValue, duration, onUpdate);
+    this.animation = new Animation(
+      startValue,
+      change,
+      finalValue,
+      duration,
+      onUpdate,
+    );
   }
 
   private async createScene(): Promise<THREE.Scene> {
@@ -177,7 +199,12 @@ export default class VisualSimulation extends Robot {
 
     try {
       const envTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-        new THREE.TextureLoader().load("background.png", resolve, undefined, reject);
+        new THREE.TextureLoader().load(
+          "background.png",
+          resolve,
+          undefined,
+          reject,
+        );
       });
       envTexture.mapping = THREE.EquirectangularReflectionMapping;
       scene.environment = envTexture;
@@ -189,13 +216,21 @@ export default class VisualSimulation extends Robot {
   }
 
   private createCamera(width: number, depth: number): THREE.PerspectiveCamera {
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000,
+    );
     camera.position.set(-Math.sqrt(depth), 1.5, -Math.sqrt(width));
     camera.lookAt(depth / 2, 0.5, width / 2);
     return camera;
   }
 
-  private createRenderer(camera: THREE.PerspectiveCamera, hostElement: HTMLDivElement) {
+  private createRenderer(
+    camera: THREE.PerspectiveCamera,
+    hostElement: HTMLDivElement,
+  ) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.shadowMap.enabled = true;
     const deltaWidth = window.innerWidth - hostElement.clientWidth;
@@ -213,9 +248,15 @@ export default class VisualSimulation extends Robot {
     return renderer;
   }
 
-  private createTable(scene: THREE.Scene, width: number, depth: number): THREE.Mesh {
+  private createTable(
+    scene: THREE.Scene,
+    width: number,
+    depth: number,
+  ): THREE.Mesh {
     const geometry = new THREE.BoxGeometry(depth, 1, width);
-    const material = new THREE.MeshLambertMaterial({ color: THREE.Color.NAMES.saddlebrown });
+    const material = new THREE.MeshLambertMaterial({
+      color: THREE.Color.NAMES.saddlebrown,
+    });
     const table = new THREE.Mesh(geometry, material);
     table.receiveShadow = true;
     table.position.set(depth / 2, -0.5, width / 2);

@@ -8,8 +8,6 @@ export default class WebCommandProcessor extends CommandProcessor {
       document.getElementById(id)!.removeAttribute("disabled");
 
       // register the event listener, using processCommand()
-      let command = id.toUpperCase();
-
       document.getElementById(id)!.addEventListener("click", (e: MouseEvent) => {
         let command = (e.target as HTMLButtonElement).id.toUpperCase();
         command = this.addCommandArgs(command);

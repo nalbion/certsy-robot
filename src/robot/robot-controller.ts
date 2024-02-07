@@ -42,7 +42,7 @@ export default class RobotController {
   constructor(
     private maxX: number,
     private maxY: number,
-    private robot: Robot
+    private robot: Robot,
   ) {}
 
   placeRobot(x: number, y: number, facing: FacingDirection) {
@@ -50,7 +50,9 @@ export default class RobotController {
       throw new Error("Invalid position");
     }
     if (!["NORTH", "SOUTH", "EAST", "WEST"].includes(facing)) {
-      throw new Error("Invalid facing direction. Valid options are NORTH, SOUTH, EAST, WEST.");
+      throw new Error(
+        "Invalid facing direction. Valid options are NORTH, SOUTH, EAST, WEST.",
+      );
     }
 
     this.x = x;
@@ -62,7 +64,11 @@ export default class RobotController {
   }
 
   move() {
-    if (this.x === undefined || this.y === undefined || this.headingIndex === undefined) {
+    if (
+      this.x === undefined ||
+      this.y === undefined ||
+      this.headingIndex === undefined
+    ) {
       console.info("Robot has not been placed");
       return;
     }
@@ -87,7 +93,8 @@ export default class RobotController {
       return;
     }
 
-    this.headingIndex = (this.headingIndex - 1 + directions.length) % directions.length;
+    this.headingIndex =
+      (this.headingIndex - 1 + directions.length) % directions.length;
     this.facing = directions[this.headingIndex].facing;
     return this.robot.rotateLeft();
   }
@@ -104,7 +111,11 @@ export default class RobotController {
   }
 
   report() {
-    if (this.x === undefined || this.y === undefined || this.facing === undefined) {
+    if (
+      this.x === undefined ||
+      this.y === undefined ||
+      this.facing === undefined
+    ) {
       return "Robot has not been placed";
     }
 

@@ -36,10 +36,15 @@ export default class CommandProcessor {
   };
 
   listCommands(): string[] {
-    return Object.keys(this.commands).map((command) => this.commands[command].name || command);
+    return Object.keys(this.commands).map(
+      (command) => this.commands[command].name || command,
+    );
   }
 
-  readCommands(controller: RobotController, input: EventEmitter = process.openStdin()) {
+  readCommands(
+    controller: RobotController,
+    input: EventEmitter = process.openStdin(),
+  ) {
     input.on("data", (data) => {
       try {
         const command = data.toString().trim();

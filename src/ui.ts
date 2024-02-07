@@ -9,8 +9,10 @@ const depth = 5;
 document.getElementById("x")!.setAttribute("max", width.toString());
 document.getElementById("y")!.setAttribute("max", depth.toString());
 
-robot.init(document.getElementById("robot") as HTMLDivElement, width, depth).then(() => {
-  const controller = new RobotController(width, depth, robot);
-  const processor = new WebCommandProcessor();
-  processor.readCommands(controller);
-});
+robot
+  .init(document.getElementById("robot") as HTMLDivElement, width, depth)
+  .then(() => {
+    const controller = new RobotController(width, depth, robot);
+    const processor = new WebCommandProcessor();
+    processor.readCommands(controller);
+  });

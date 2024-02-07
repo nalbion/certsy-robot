@@ -136,7 +136,7 @@ describe("RobotController", () => {
 
         // Then
         expect(controller.report()).toBe(`1,1,${expectedDirection}`);
-      }
+      },
     );
   });
 
@@ -157,7 +157,7 @@ describe("RobotController", () => {
 
         // Then
         expect(controller.report()).toBe(`1,1,${expectedDirection}`);
-      }
+      },
     );
   });
 });

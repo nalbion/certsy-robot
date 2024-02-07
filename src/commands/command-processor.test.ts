@@ -30,7 +30,14 @@ describe("CommandProcessor", () => {
     const commands = processor.listCommands();
 
     // Then
-    expect(commands).toEqual(["`PLACE X,Y,F`", "MOVE", "LEFT", "RIGHT", "REPORT", "EXIT"]);
+    expect(commands).toEqual([
+      "`PLACE X,Y,F`",
+      "MOVE",
+      "LEFT",
+      "RIGHT",
+      "REPORT",
+      "EXIT",
+    ]);
   });
 
   it("should call the action function for PLACE command", () => {
