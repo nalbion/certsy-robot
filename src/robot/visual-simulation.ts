@@ -54,6 +54,9 @@ export default class VisualSimulation extends Robot {
 
   override setPosition(x: number, y: number) {
     // Note: x/y are not as user would expect
+    // Cancel any animations
+    this.animation = undefined;
+    this.commandQueue = [];
     this.robot!.position.set(y, 0, x);
 
     if (!this.robotPlaced) {
@@ -138,7 +141,7 @@ export default class VisualSimulation extends Robot {
       const elapsedTime = this.clock.getElapsedTime();
 
       if (!this.animation && this.commandQueue.length > 0) {
-        // Dequeue an action and execute it
+        // Dequeue a command and execute it
         let command = this.commandQueue.shift();
         command!();
       }
